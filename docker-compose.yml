@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  mlflow:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install mlflow --quiet &&
+             mlflow server
+               --backend-store-uri sqlite:///mlruns/mlflow.db
+               --default-artifact-root ./mlruns
+               --host 0.0.0.0
+               --port 5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlruns
+
+  api:
+    build: .
+    command: uvicorn serve:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - mlflow
+    volumes:
+      - .:/app
+      - model_store:/app/models
+
+  dashboard:
+    build: .
+    command: python dashboard.py
+    ports:
+      - "8050:8050"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - mlflow
+    volumes:
+      - .:/app
+      - model_store:/app/models
+
+volumes:
+  mlflow_data:
+  model_store:

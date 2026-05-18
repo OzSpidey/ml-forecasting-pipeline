@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+mlflow.db
+mlruns/
+models/*.joblib
+models/*.pt
+models/*_meta.json
+!models/.gitkeep
+.DS_Store
